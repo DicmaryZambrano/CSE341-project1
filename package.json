@@ -1,0 +1,25 @@
+{
+  "name": "cse341",
+  "version": "1.0.0",
+  "description": "My CSE341 Project 1",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "dev": "node app.js",
+    "git-update": "git add . && git commit -m \"$npm_package_config_message\" && git push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DicmaryZambrano/CSE341-project1.git"
+  },
+  "author": "Dicmary Zambrano",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DicmaryZambrano/CSE341-project1/issues"
+  },
+  "homepage": "https://github.com/DicmaryZambrano/CSE341-project1#readme",
+  "config": {
+    "message": "update"
+  }
+}
