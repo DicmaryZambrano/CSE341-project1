@@ -6,8 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon app.js",
-    "dev": "node app.js",
-    "git-update": "git add . && git commit -m \"$npm_package_config_message\" && git push"
+    "dev": "node app.js"
   },
   "repository": {
     "type": "git",
