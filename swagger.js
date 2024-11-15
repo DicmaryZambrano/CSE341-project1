@@ -6,12 +6,12 @@ const doc = {
     title: 'Cse341 Contacts API',
     description: 'An API to manage and retrieve information about contacts.',
   },
-  host: 'https://contacts-project-vezc.onrender.com',
+  host: 'contacts-project-vezc.onrender.com',
   basePath: '/',
-  schemes: ['http', 'https'],
+  schemes: ['https'],
   definitions: {
     Contact: {
-      _id: '6732fa9fbdeec34a5760cd46',
+      _id: '6732fa9fbdeec34a5760cd49',
       firstName: 'John',
       lastName: 'Doe',
       email: 'johndoe@example.com',

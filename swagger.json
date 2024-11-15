@@ -5,10 +5,9 @@
     "description": "An API to manage and retrieve information about contacts.",
     "version": "1.0.0"
   },
-  "host": "https://contacts-project-vezc.onrender.com",
+  "host": "contacts-project-vezc.onrender.com",
   "basePath": "/",
   "schemes": [
-    "http",
     "https"
   ],
   "paths": {
