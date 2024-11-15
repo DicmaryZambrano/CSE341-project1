@@ -7,7 +7,7 @@ routes.use('/', swagger);
 routes.use('/contacts', contacts);
 routes.use('/', (req, res) => {
   const docData = {
-    documentationURL: 'https://nathanbirch.github.io/nathan-byui-api-docs',
+    documentationURL: 'https://contacts-project-vezc.onrender.com/api-docs/',
   };
   res.send(docData);
 });
