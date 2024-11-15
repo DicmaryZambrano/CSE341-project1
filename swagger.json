@@ -191,11 +191,6 @@
       "type": "object",
       "required": ["firstName", "email"],
       "properties": {
-        "_id": {
-          "type": "string",
-          "example": "6732fa9fbdeec34a5760cd46",
-          "description": "Unique identifier for the contact"
-        },
         "firstName": {
           "type": "string",
           "example": "John",

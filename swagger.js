@@ -11,7 +11,6 @@ const doc = {
   schemes: ['https'],
   definitions: {
     Contact: {
-      _id: '6732fa9fbdeec34a5760cd49',
       firstName: 'John',
       lastName: 'Doe',
       email: 'johndoe@example.com',
