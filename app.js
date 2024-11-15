@@ -1,35 +1,49 @@
 const express = require('express');
-const app = express();
 const dotenv = require('dotenv');
-const mongodb = require("./db/connection")
+const BodyParser = require('body-parser');
+const mongodb = require('./db/connection');
+const routes = require('./routes');
 
-const baseRoute = require('./routes/index');
-const contactRoute = require('./routes/contactsRoute');
-
+const app = express();
 dotenv.config();
 
 const port = process.env.PORT || 3000;
 
+app.use(BodyParser.json());
+app.use(BodyParser.urlencoded({ extended: true }));
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Z-Key',
+  );
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, DELETE, OPTIONS',
+  );
+  next();
+});
+
 /* Routes */
 
-app.use('/', baseRoute);
-
-app.use('/contacts', contactRoute);
+app.use('/', routes);
 
 /* Error Handler */
 
-app.use(function (req, res) {
-  res.status(404).send({ url: req.originalUrl + ' not found' })
+app.use((req, res) => {
+  res.status(404).send({ url: `${req.originalUrl} not found` });
 });
 
 /* Database Connection an api initialization */
 
 mongodb.initDb((err) => {
-  if(err) {
-    console.log(err)
+  if (err) {
+    console.log(err);
   } else {
     app.listen(port, () => {
-      console.log('Database is connected and Web Server is listening at port ' + port);
+      console.log(
+        `Database is connected and Web Server is listening at port ${port}`,
+      );
     });
-  };
-})
+  }
+});
