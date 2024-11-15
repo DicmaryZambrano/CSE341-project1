@@ -1,7 +1,24 @@
 const { ObjectId } = require('mongodb');
+const Joi = require('joi');
 const mongodb = require('../db/connection');
 
 const contactsCont = {};
+
+// Define validation schema for contact using Joi
+const contactSchema = Joi.object({
+  firstName: Joi.string().required().description('First name of the contact'),
+  lastName: Joi.string().optional().description('Last name of the contact'),
+  email: Joi.string()
+    .email()
+    .required()
+    .description('Email address of the contact'),
+  favoriteColor: Joi.string()
+    .optional()
+    .description('Favorite color of the contact'),
+  birthday: Joi.date()
+    .optional()
+    .description('Birthday of the contact in YYYY-MM-DD format'),
+});
 
 contactsCont.getContacts = async (req, res) => {
   // #swagger.tags=['Contacts']
@@ -13,15 +30,12 @@ contactsCont.getContacts = async (req, res) => {
       .find()
       .toArray();
     if (contacts.length > 0) {
-      res.setHeader('Content-Type', 'application/json');
       res.status(200).json(contacts);
     } else {
       res.status(404).json({ message: 'No contacts found' });
     }
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'An error occurred while retrieving contacts', error });
+    res.status(500).json({ message: 'Error retrieving contacts', error });
   }
 };
 
@@ -29,39 +43,36 @@ contactsCont.getContactById = async (req, res) => {
   // #swagger.tags=['Contacts']
   const { contactId } = req.params;
 
-  if (!contactId) {
+  if (!ObjectId.isValid(contactId)) {
     return res.status(400).json({ message: 'Invalid contact ID format' });
   }
 
   try {
-    const result = await mongodb
+    const contact = await mongodb
       .getDatabase()
       .db('Contactsdb')
       .collection('contacts')
       .findOne({ _id: ObjectId.createFromHexString(contactId) });
-    if (result) {
-      res.setHeader('Content-Type', 'application/json');
-      res.status(200).json(result);
+    if (contact) {
+      res.status(200).json(contact);
     } else {
-      res.status(404).json({ message: `Contact of id ${contactId} not found` });
+      res
+        .status(404)
+        .json({ message: `Contact with id ${contactId} not found` });
     }
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'An error occurred while retrieving contact', error });
+    res.status(500).json({ message: 'Error retrieving contact', error });
   }
 };
 
 contactsCont.addContact = async (req, res) => {
   // #swagger.tags=['Contacts']
-  const contact = req.body;
+  const { error, value } = contactSchema.validate(req.body);
 
-  if (
-    !contact ||
-    typeof contact !== 'object' ||
-    Object.keys(contact).length === 0
-  ) {
-    return res.status(400).json({ message: 'Invalid contact data' });
+  if (error) {
+    return res
+      .status(400)
+      .json({ message: 'Invalid contact data', details: error.details });
   }
 
   try {
@@ -69,29 +80,43 @@ contactsCont.addContact = async (req, res) => {
       .getDatabase()
       .db('Contactsdb')
       .collection('contacts')
-      .insertOne(contact);
-    res.setHeader('Content-Type', 'application/json');
+      .insertOne(value);
     res
       .status(201)
       .json({ message: 'Contact created', contactId: result.insertedId });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'An error occurred while creating contact', error });
+  } catch (err) {
+    res.status(500).json({ message: 'Error creating contact', err });
   }
 };
 
 contactsCont.updateContactById = async (req, res) => {
   // #swagger.tags=['Contacts']
   const { contactId } = req.params;
-  const contact = req.body;
 
-  if (!contactId) {
+  if (!ObjectId.isValid(contactId)) {
     return res.status(400).json({ message: 'Invalid contact ID format' });
   }
 
-  if (!contact || typeof contact !== 'object') {
-    return res.status(400).json({ message: 'Invalid contact data' });
+  const updateSchema = Joi.object({
+    firstName: Joi.string().optional(),
+    lastName: Joi.string().optional(),
+    email: Joi.string().email().optional(),
+    favoriteColor: Joi.string().optional(),
+    birthday: Joi.date().optional(),
+  });
+
+  const { error, value } = updateSchema.validate(req.body);
+
+  if (error) {
+    return res
+      .status(400)
+      .json({ message: 'Invalid contact data', details: error.details });
+  }
+
+  if (Object.keys(value).length === 0) {
+    return res
+      .status(400)
+      .json({ message: 'At least one field must be provided for update' });
   }
 
   try {
@@ -101,7 +126,7 @@ contactsCont.updateContactById = async (req, res) => {
       .collection('contacts')
       .updateOne(
         { _id: ObjectId.createFromHexString(contactId) },
-        { $set: contact },
+        { $set: value },
       );
 
     if (result.matchedCount === 0) {
@@ -109,13 +134,10 @@ contactsCont.updateContactById = async (req, res) => {
         .status(404)
         .json({ message: `Contact with id ${contactId} not found` });
     } else {
-      res.setHeader('Content-Type', 'application/json');
       res.status(200).json({ message: 'Contact updated successfully' });
     }
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'An error occurred while updating contact', error });
+  } catch (err) {
+    res.status(500).json({ message: 'Error updating contact', err });
   }
 };
 
@@ -123,7 +145,7 @@ contactsCont.deleteContactById = async (req, res) => {
   // #swagger.tags=['Contacts']
   const { contactId } = req.params;
 
-  if (!contactId) {
+  if (!ObjectId.isValid(contactId)) {
     return res.status(400).json({ message: 'Invalid contact ID format' });
   }
 
@@ -139,13 +161,10 @@ contactsCont.deleteContactById = async (req, res) => {
         .status(404)
         .json({ message: `Contact with id ${contactId} not found` });
     } else {
-      res.setHeader('Content-Type', 'application/json');
       res.status(200).json({ message: 'Contact deleted successfully' });
     }
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: 'An error occurred while deleting contact', error });
+    res.status(500).json({ message: 'Error deleting contact', error });
   }
 };
 
